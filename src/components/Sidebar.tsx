@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import SheetItem from "./Sheetitem";
+import SheetItem from "./SheetItem";
 import { X, LogOut, Filter } from "lucide-react";
 
 export default function Sidebar({
