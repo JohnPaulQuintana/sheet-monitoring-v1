@@ -1,26 +1,22 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+// src/App.tsx
+import Dashboard from "./pages/Dashboard";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import Login from "./components/Login";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+function AppContent() {
+  const { user, loading } = useAuth();
+
+  if (loading) return <p className="p-4">Loading...</p>;
+
+  return user ? <Dashboard /> : <Login />;
 }
 
-export default App;
+export default function App() {
+  return (
+    <AuthProvider>
+      <div className="h-screen flex flex-col bg-gray-50 text-gray-900">
+        <AppContent />
+      </div>
+    </AuthProvider>
+  );
+}
