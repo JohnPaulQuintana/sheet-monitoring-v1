@@ -19,23 +19,56 @@
 // }
 
 // export const firestore = admin.firestore();
-import admin from "firebase-admin";
+// import admin from "firebase-admin";
 
+// let serviceAccount;
+
+// try {
+//   if (!process.env.FIRESTORE_CREDENTIALS_BASE64) {
+//     throw new Error("Missing FIRESTORE_CREDENTIALS_BASE64 environment variable");
+//   }
+
+//   serviceAccount = JSON.parse(
+//     Buffer.from(process.env.FIRESTORE_CREDENTIALS_BASE64, "base64").toString("utf8")
+//   );
+// } catch (err) {
+//   console.error("Failed to parse Firebase credentials:", err);
+//   throw err;
+// }
+
+// if (!admin.apps.length) {
+//   admin.initializeApp({
+//     credential: admin.credential.cert(serviceAccount),
+//   });
+// }
+
+// export const firestore = admin.firestore();
+import admin from "firebase-admin";
+import fs from "fs";
+import { loadAllServiceAccounts } from "./loadSecrets.js";
+
+// Initialize Firestore Admin SDK using decoded credentials from helper
 let serviceAccount;
 
 try {
-  if (!process.env.FIRESTORE_CREDENTIALS_BASE64) {
-    throw new Error("Missing FIRESTORE_CREDENTIALS_BASE64 environment variable");
+  // 🧩 Decode all Base64 envs and get their file paths
+  const { firestorePath } = loadAllServiceAccounts();
+
+  if (!fs.existsSync(firestorePath)) {
+    throw new Error("Firestore credentials file not found at " + firestorePath);
   }
 
-  serviceAccount = JSON.parse(
-    Buffer.from(process.env.FIRESTORE_CREDENTIALS_BASE64, "base64").toString("utf8")
-  );
+  // 🧠 Read parsed credentials
+  const fileContents = fs.readFileSync(firestorePath, "utf8");
+  serviceAccount = JSON.parse(fileContents);
+
+  console.log("🔥 Firestore initialized using decoded FIRESTORE_CREDENTIALS_BASE64");
 } catch (err) {
-  console.error("Failed to parse Firebase credentials:", err);
+  console.error("❌ Failed to load Firestore credentials:", err);
   throw err;
 }
 
+// Initialize Admin only once
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),

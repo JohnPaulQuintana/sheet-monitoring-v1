@@ -1,6 +1,8 @@
 // netlify/functions/sheetReader.js
 import { google } from "googleapis";
 import { firestore } from "./utils/firebaseAdmin.js";
+import { loadAllServiceAccounts } from "./utils/loadSecrets.js";
+import fs from "fs";
 
 export const handler = async (event) => {
   try {
@@ -25,14 +27,12 @@ export const handler = async (event) => {
       };
     }
 
-    // 🔐 Decode Base64 credentials
-    const decodedCredentials = JSON.parse(
-      Buffer.from(process.env.SHEET_ACCOUNT_BASE64, "base64").toString("utf8")
-    );
+    const { sheetPath } = loadAllServiceAccounts();
+    const sheetCredentials = JSON.parse(fs.readFileSync(sheetPath, "utf8"));
 
     const credentials = {
-      client_email: decodedCredentials.client_email,
-      private_key: decodedCredentials.private_key.replace(/\\n/g, "\n"),
+      client_email: sheetCredentials.client_email,
+      private_key: sheetCredentials.private_key.replace(/\\n/g, "\n"),
     };
 
     const auth = new google.auth.GoogleAuth({
