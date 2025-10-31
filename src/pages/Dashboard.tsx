@@ -5,18 +5,26 @@ import Header from "../components/Header";
 import SheetHistory from "../components/SheetHistory";
 import AddSheetTab from "../components/AddSheetTab";
 import { fetchSheetHistory } from "../services/api";
-import { User, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  User,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase"; // your firebase config
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, Timestamp } from "firebase/firestore";
 import { useAuth } from "../contexts/AuthContext";
 import { db } from "../firebase";
+import UserAccordion from "../components/UserAccordion";
+import { motion } from "framer-motion";
 
 export default function Dashboard() {
   const [sheets, setSheets] = useState<any[]>([]);
   const [selectedSheet, setSelectedSheet] = useState<any | null>(null);
   const [history, setHistory] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState("history");
+  const [activeTab, setActiveTab] = useState("data-processor");
   const [activeUser, setActiveUser] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -71,7 +79,7 @@ export default function Dashboard() {
         const data = await fetchSheetHistory();
         const newSheets = data.spreadsheets || [];
         const changed = JSON.stringify(newSheets) !== JSON.stringify(sheets);
-        console.log("Sending request for new updates....")
+        console.log("Sending request for new updates....");
         if (changed) {
           console.log("🔄 Detected sheet updates, refreshing UI");
           setSheets(newSheets);
@@ -99,16 +107,47 @@ export default function Dashboard() {
     setHistory(sheet?.history || []);
   };
 
-  // 🧩 Get all unique users from sheet histories
+  // 🧩 Get active users from sheet histories (filtered by edit count + recent activity)
   const users = useMemo(() => {
-    const userSet = new Set<string>();
+    const userStats: Record<string, { count: number; lastEdit: number }> = {};
+
+    // 1️⃣ Aggregate user edit counts and latest edit date
     sheets.forEach((sheet) => {
       sheet.history?.forEach((h: any) => {
-        // console.log(h)
-        if (h.user) userSet.add(h.user);
+        console.log(h);
+        if (!h.user || !h.modifiedTime) return;
+
+        const user = h.user.trim();
+        const editTime = new Date(h.modifiedTime).getTime();
+
+        if (!userStats[user]) {
+          userStats[user] = { count: 1, lastEdit: editTime };
+        } else {
+          userStats[user].count += 1;
+          if (editTime > userStats[user].lastEdit) {
+            userStats[user].lastEdit = editTime;
+          }
+        }
       });
     });
-    return Array.from(userSet);
+
+    // 2️⃣ Define thresholds
+    const MIN_EDITS = 5; // minimum number of edits to be considered "active"
+    const MAX_DAYS_INACTIVE = 30; // if last edit older than 30 days, skip
+
+    const now = Date.now();
+
+    // 3️⃣ Filter users based on thresholds
+    const filteredUsers = Object.keys(userStats).filter((user) => {
+      const { count, lastEdit } = userStats[user];
+      const daysSinceEdit = (now - lastEdit) / (1000 * 60 * 60 * 24);
+      return count > MIN_EDITS && daysSinceEdit <= MAX_DAYS_INACTIVE;
+    });
+
+    // 4️⃣ Sort by most recent activity first
+    filteredUsers.sort((a, b) => userStats[b].lastEdit - userStats[a].lastEdit);
+
+    return filteredUsers;
   }, [sheets]);
 
   // 🎯 Filter sheets by selected user
@@ -128,8 +167,34 @@ export default function Dashboard() {
     }
   };
 
-  if (loading) return <p className="text-gray-500 p-4">Loading sheets...</p>;
-  if (error) return <p className="text-red-500 p-4">Error: {error}</p>;
+  // ✅ Loading State
+  if (loading)
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="mb-6"
+        >
+          <Loader2 size={64} className="text-green-600" />
+        </motion.div>
+        <p className="text-lg font-semibold text-gray-700 animate-pulse">
+          Loading sheets...
+        </p>
+      </div>
+    );
+
+  // ✅ Error State
+  if (error)
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+        <AlertCircle size={64} className="text-red-600 mb-4" />
+        <p className="text-lg font-semibold text-red-700">
+          Error loading sheets
+        </p>
+        <p className="text-sm text-red-500 mt-1">{error}</p>
+      </div>
+    );
 
   return (
     <div className="h-screen bg-gray-50 flex overflow-hidden">
@@ -154,9 +219,9 @@ export default function Dashboard() {
         />
 
         {/* 🧭 Responsive User Tabs (Scrollable + Adaptive Layout) */}
-        {users.length > 0 && (
+        {/* {users.length > 0 && (
           <div className="relative flex items-center bg-white border-b border-gray-200">
-            {/* ◀ Scroll Left */}
+            
             <button
               onClick={() =>
                 scrollRef.current?.scrollBy({ left: -200, behavior: "smooth" })
@@ -166,7 +231,7 @@ export default function Dashboard() {
               <ChevronLeft size={18} />
             </button>
 
-            {/* Tabs Container */}
+            
             <div
               ref={scrollRef}
               className="
@@ -214,7 +279,7 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* ▶ Scroll Right */}
+            
             <button
               onClick={() =>
                 scrollRef.current?.scrollBy({ left: 200, behavior: "smooth" })
@@ -224,11 +289,21 @@ export default function Dashboard() {
               <ChevronRight size={18} />
             </button>
           </div>
-        )}
+        )} */}
 
         {/* Tabs (History / Add Sheet) */}
         <div className="flex items-center border-b bg-white px-6">
           <button
+            className={`py-3 px-4 text-sm font-medium ${
+              activeTab === "data-processor"
+                ? "border-b-2 border-green-600 text-green-700"
+                : "text-gray-500 hover:text-green-600"
+            }`}
+            onClick={() => setActiveTab("data-processor")}
+          >
+            Data Processor
+          </button>
+          {/* <button
             className={`py-3 px-4 text-sm font-medium ${
               activeTab === "history"
                 ? "border-b-2 border-green-600 text-green-700"
@@ -237,7 +312,7 @@ export default function Dashboard() {
             onClick={() => setActiveTab("history")}
           >
             History
-          </button>
+          </button> */}
           <button
             className={`py-3 px-4 text-sm font-medium ${
               activeTab === "add"
@@ -261,6 +336,69 @@ export default function Dashboard() {
               </p>
             ))}
           {activeTab === "add" && <AddSheetTab />}
+          {activeTab === "data-processor" && (
+            <div>
+              {users.map((u) => {
+                const userLower = u.toLowerCase();
+
+                // 🔍 Get all sheets this user ever touched
+                const userSheets = sheets.filter((sheet) =>
+                  sheet.history?.some(
+                    (h: any) => h.user?.toLowerCase() === userLower
+                  )
+                );
+
+                // 🧮 Compute counts
+                let updatedCount = 0;
+                let notUpdatedCount = 0;
+
+                userSheets.forEach((sheet) => {
+                  const lastModified = new Date(sheet.lastModifiedTime);
+                  const now = new Date();
+
+                  const isToday =
+                    lastModified.getFullYear() === now.getFullYear() &&
+                    lastModified.getMonth() === now.getMonth() &&
+                    lastModified.getDate() === now.getDate();
+
+                  // ✅ If this user appears in sheet.history (edited before)
+                  // AND the sheet was updated today → count as updated
+                  const hasEdited = sheet.history?.some(
+                    (h: any) => h.user?.toLowerCase() === userLower
+                  );
+
+                  if (hasEdited && isToday) {
+                    updatedCount++;
+                  } else {
+                    notUpdatedCount++;
+                  }
+                });
+
+                // 🕒 Find latest edit time for display
+                const lastUpdated = userSheets
+                  .map((s) => new Date(s.lastModifiedTime || 0).getTime())
+                  .filter(Boolean)
+                  .sort((a, b) => b - a)[0];
+
+                const lastUpdatedDate = lastUpdated
+                  ? new Date(lastUpdated).toLocaleString()
+                  : "N/A";
+
+                return (
+                  <UserAccordion
+                    key={u}
+                    user={u}
+                    sheets={userSheets}
+                    sheetCount={userSheets.length}
+                    updatedCount={updatedCount}
+                    notUpdatedCount={notUpdatedCount}
+                    lastUpdated={lastUpdatedDate}
+                    onSelectSheet={handleSelectSheet}
+                  />
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

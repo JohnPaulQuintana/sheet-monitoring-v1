@@ -34,8 +34,8 @@ export default function Sidebar({
 
   const filters = [
     { id: "all", label: "All" },
-    { id: "updated", label: "Updated" },
-    { id: "not-updated", label: "Not Updated" },
+    { id: "updated", label: "Completed" },
+    { id: "not-updated", label: "Not Completed" },
   ];
 
   return (
@@ -77,10 +77,10 @@ export default function Sidebar({
               <button
                 key={f.id}
                 onClick={() => setSortFilter(f.id)}
-                className={`flex-1 p-1 rounded-full text-xs font-medium transition-all duration-200 
+                className={`flex-1 p-1 rounded-md text-[10px] font-medium transition-all duration-200 
                   ${
                     sortFilter === f.id
-                      ? "bg-green-600 text-white shadow-sm"
+                      ? "bg-green-600 text-white shadow-xs"
                       : "bg-white border border-green-200 text-green-700 hover:bg-green-100"
                   }`}
               >

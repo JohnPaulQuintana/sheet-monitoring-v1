@@ -14,7 +14,7 @@ export default function SheetItem({ sheet, active, onClick }: any) {
 
   return (
     <div
-      onClick={onClick}
+      // onClick={onClick}
       className={`mx-3 my-2 p-3 rounded-lg cursor-pointer transition-all border ${
         active
           ? "bg-white border-green-500 shadow-sm"
