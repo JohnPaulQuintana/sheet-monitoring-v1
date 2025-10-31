@@ -19,56 +19,19 @@
 // }
 
 // export const firestore = admin.firestore();
-// import admin from "firebase-admin";
-
-// let serviceAccount;
-
-// try {
-//   if (!process.env.FIRESTORE_CREDENTIALS_BASE64) {
-//     throw new Error("Missing FIRESTORE_CREDENTIALS_BASE64 environment variable");
-//   }
-
-//   serviceAccount = JSON.parse(
-//     Buffer.from(process.env.FIRESTORE_CREDENTIALS_BASE64, "base64").toString("utf8")
-//   );
-// } catch (err) {
-//   console.error("Failed to parse Firebase credentials:", err);
-//   throw err;
-// }
-
-// if (!admin.apps.length) {
-//   admin.initializeApp({
-//     credential: admin.credential.cert(serviceAccount),
-//   });
-// }
-
-// export const firestore = admin.firestore();
 import admin from "firebase-admin";
-import fs from "fs";
-import { loadAllServiceAccounts } from "./loadSecrets.js";
 
-// Initialize Firestore Admin SDK using decoded credentials from helper
+// 🔑 Base64 string embedded directly in the code
+const account_base64 = "ew0KICAidHlwZSI6ICJzZXJ2aWNlX2FjY291bnQiLA0KICAicHJvamVjdF9pZCI6ICJiai1hbGVydCIsDQogICJwcml2YXRlX2tleV9pZCI6ICIzNGU2MGE2N2E5NmJkZTE0MGJmMDliZDUzN2MwNDJjM2EwNmMwNWU5IiwNCiAgInByaXZhdGVfa2V5IjogIi0tLS0tQkVHSU4gUFJJVkFURSBLRVktLS0tLVxuTUlJRXZ3SUJBREFOQmdrcWhraUc5dzBCQVFFRkFBU0NCS2t3Z2dTbEFnRUFBb0lCQVFDMFpFYUJmUVM3TUlFNVxud21wUDlHQXRUQnRXOUVhcmhwYWdJV0puSXMzd1dsa28yaXM3U0FEdjFPRmtLS0FyU2V6cEJZWktyQVdvRzFvZFxuQ0J6eHorTm8xczNWdjBhYVVZNGtpazJaVDR1a0ZwTTZ3VU5KNmkySnM2OVdNNDZrVWFKYVVwQzFHQ1FLdUtlN1xuNTk1YjBKby9rVGN2c0VVOWR4N05GcUJWQnRzNWcwR3FGMjRkczFFcFVzL3NwNHdiR2xHaWQvcHlHR1Ywd254M1xuN2FXSEpBbTdLclB0Zjk1K01SeTBxdGpaTGMvUjB6MW82TkVSQkYzTWs5Ykk5RUoxOUdQeE41NmM2MWRCTytGbVxuVjVLb3Q4UXN2MHlHdlpSbkxSTHlzQisraDhzSzQ2ZHFZZ09DY1orSVZmMVRvYWgzSVVjcnQ0Wk4wTDZocHFBUlxudWRIN1pxOTNBZ01CQUFFQ2dnRUFPTXJ0SzYxSmhRbURWY1R3cFpXQmhpRlU1aTVuNVc2dEUyTVBVUHN6TFAyMFxuM2xpNWphTmdzQ0VzaU5VRmdEdDQrL0FDVkpZTi9kd0dwZWM4L2FCK3J5NFpoYmIvcW13TXZWSlJsZmZtTmRYcFxucW5EWUYzaER0L3U3TXY5dVpDdFRXdTV0b3FZa0NzQVNCdVc4S3RubEJpaFk0SW0xY3VHQzcveTBvN0JSNnF2eFxuN0Zoem0xZ082c29TZU50aUg1N3lSLzVEcnJ5RHRPQkpkRFdRS2hWNEQvM3d3azBEdS9qUCtnbTJvSW5qMzlLVlxuc0hQWXZOdmV1bExEMndxWVNvMHJLNFN0RUpPREg3eWl3eWVzZEFOV3FlRjJtak1YMkdjbG1iV3FOZU9FTWxZZVxuR0NHN0tuOGgvZ2pPSmVNRStJbDVXNzRydC85Wjk3TEE2d0kzUmhtZ0NRS0JnUURkU2ZpVFlCNzdZSk5PK0d4alxuM29BUGtSNW9TaGxDYVlZY1NlS0xScGNySGNhZFI3amUzWnZVZ1hFMjJSZitLaGdpdlc3UkJqMGZINmVpTXR6MVxuL1FieG1hTzhkdDZWNjM2c2QvTkhhRFp4cEYrYVpxUVBiNkhDY0U0ZnUxMCs5eHZtR1pGdWsxcjcvT0hHSk5VaVxucG1XcG9Zcll2NVdJRTcxN0xTRVoyRDBEOVFLQmdRRFFzQXN6cmIxTkFHNmtYWWlnNzFxU2xGMUNpZHp2MVlaUlxudE85M2dvWkVYN09vM1YxcGN3cWhpTm9RUDZFSlI5M0d1TFZoRWljeUY1SGRsckdCU2RrMnVwY0Q1TFN0OEcrM1xuaUh3eC9welBBQWRBSVplam5vakZYUFdHSU9YQ2owRUJwUHoxZ25WdjRPNHdoaDZXSDhNTWRWbEc1d1JpdVVjWVxuMWdRczdHWHVPd0tCZ1FDOENJYjRjOHpmdllodXFoa3dJM2lkd2FvYzVCbmluTmdnWVlmbTRPekM3bUkrY3h0Y1xuQk9MTkI5Q3owblRZdTl3V2FQRXBIQ3dEcmxvN01RMGcyUWgxY3gvMm5PczJhUTBTY0RxQWlzVDRlN3ZnN3lhcFxuRnlwVWxpbE1QV0ZXaDVObFNvU1JlUlR1MmtyZW01MmYrOVNXOTNWK2I0MFlPKzNlSk5ManF5THRvUUtCZ1FES1xub21YK0pER3YxeitYOGdwODJtMUQ3elF2SzlhUU92RlYzUzY1Q05CL0M3NVR0YjdDYWFaays1RmlQYWFNY0cvMFxuU2Q0MUIzOXZzRnMrb3RoeEJkZ1l3RTFxeG1SNmtRQ3BZYW5Xa2JpSmR5bVRLQXNxSVFJRlFpSlZ2eFBhTzJlUFxueFRpcTI2WlVvRUFvZGRLMVN0b0YrdHhaY0hCZHZESkE5MjdPZ0N6cGlRS0JnUURHUEJhTXQ1RnJtcUVXMHNNclxuc1NueEN4VklCRUQxbjZPMU9uVlM3UENTc05uZTg1YjlqVzhDNS82Um1qVTY0U3g2RG5weW9pYi9TVzRBSEx4VFxuR29jbFdXK2lxUWpIV1ZVc2VVVzNSaFRMcWZpcnFkWitZb3Y3cjdNZG5LYWdhTTE3YkRaQ0pSTHczLzlYaURDb1xuS05TT25TNjBFZnQ0N05QS2M4T21BbWJRVXc9PVxuLS0tLS1FTkQgUFJJVkFURSBLRVktLS0tLVxuIiwNCiAgImNsaWVudF9lbWFpbCI6ICJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0Biai1hbGVydC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsDQogICJjbGllbnRfaWQiOiAiMTA0MTE3MzE5NzA0MjQwMzQ1MjQ3IiwNCiAgImF1dGhfdXJpIjogImh0dHBzOi8vYWNjb3VudHMuZ29vZ2xlLmNvbS9vL29hdXRoMi9hdXRoIiwNCiAgInRva2VuX3VyaSI6ICJodHRwczovL29hdXRoMi5nb29nbGVhcGlzLmNvbS90b2tlbiIsDQogICJhdXRoX3Byb3ZpZGVyX3g1MDlfY2VydF91cmwiOiAiaHR0cHM6Ly93d3cuZ29vZ2xlYXBpcy5jb20vb2F1dGgyL3YxL2NlcnRzIiwNCiAgImNsaWVudF94NTA5X2NlcnRfdXJsIjogImh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL3JvYm90L3YxL21ldGFkYXRhL3g1MDkvZmlyZWJhc2UtYWRtaW5zZGstZmJzdmMlNDBiai1hbGVydC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSINCn0NCg==";
+
 let serviceAccount;
-
 try {
-  // 🧩 Decode all Base64 envs and get their file paths
-  const { firestorePath } = loadAllServiceAccounts();
-
-  if (!fs.existsSync(firestorePath)) {
-    throw new Error("Firestore credentials file not found at " + firestorePath);
-  }
-
-  // 🧠 Read parsed credentials
-  const fileContents = fs.readFileSync(firestorePath, "utf8");
-  serviceAccount = JSON.parse(fileContents);
-
-  console.log("🔥 Firestore initialized using decoded FIRESTORE_CREDENTIALS_BASE64");
+  serviceAccount = JSON.parse(Buffer.from(account_base64, "base64").toString("utf8"));
 } catch (err) {
-  console.error("❌ Failed to load Firestore credentials:", err);
+  console.error("Failed to parse Firebase credentials:", err);
   throw err;
 }
 
-// Initialize Admin only once
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -76,3 +39,4 @@ if (!admin.apps.length) {
 }
 
 export const firestore = admin.firestore();
+

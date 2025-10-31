@@ -4,23 +4,23 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 // Your Firebase config from Firebase Console
-// const firebaseConfig = {
-//   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-//   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-//   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-//   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-//   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-//   appId: import.meta.env.VITE_FIREBASE_APP_ID,
-// };
-
 const firebaseConfig = {
-  apiKey: "AIzaSyBl0GGJM0mZK_MtQNCS0GpkhvtpuDPIfMA",
-  authDomain: "bj-alert.firebaseapp.com",
-  projectId: "bj-alert",
-  storageBucket: "bj-alert.firebasestorage.app",
-  messagingSenderId: "149339289115",
-  appId: "1:149339289115:web:813c82d053e2cc4fa62abe",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
+
+// const firebaseConfig = {
+//   apiKey: "AIzaSyBl0GGJM0mZK_MtQNCS0GpkhvtpuDPIfMA",
+//   authDomain: "bj-alert.firebaseapp.com",
+//   projectId: "bj-alert",
+//   storageBucket: "bj-alert.firebasestorage.app",
+//   messagingSenderId: "149339289115",
+//   appId: "1:149339289115:web:813c82d053e2cc4fa62abe",
+// };
 
 const app = initializeApp(firebaseConfig);
 
