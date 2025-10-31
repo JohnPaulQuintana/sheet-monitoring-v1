@@ -12,6 +12,8 @@ export const handler = async (event) => {
       };
     }
 
+    
+
     // Fetch user sheet IDs from Firestore
     const userDoc = await firestore.collection("online_sheets").doc(uid).get();
     const sheetIds = userDoc.exists ? userDoc.data().sheet_ids || [] : [];
@@ -23,9 +25,14 @@ export const handler = async (event) => {
       };
     }
 
+    // 🔐 Decode Base64 credentials
+    const decodedCredentials = JSON.parse(
+      Buffer.from(process.env.SHEET_ACCOUNT_BASE64, "base64").toString("utf8")
+    );
+
     const credentials = {
-      client_email: process.env.GOOGLE_CLIENT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      client_email: decodedCredentials.client_email,
+      private_key: decodedCredentials.private_key.replace(/\\n/g, "\n"),
     };
 
     const auth = new google.auth.GoogleAuth({
