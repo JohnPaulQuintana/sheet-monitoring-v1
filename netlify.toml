@@ -7,3 +7,7 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+
+[functions.sendNotUpdatedSheets]
+  schedule = "0 18 * * *" # every day at 6PM server time

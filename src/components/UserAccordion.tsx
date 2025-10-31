@@ -51,6 +51,24 @@ export default function UserAccordion({
     else return aUpdated === bUpdated ? 0 : aUpdated ? 1 : -1;
   });
 
+  // Function to generate "Telegram message" for this user
+  // Inside your UserAccordion or wherever you want the button
+  const triggerTelegram = async () => {
+    try {
+      await fetch("/.netlify/functions/sendNotUpdatedSheets", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // optionally, send data if your handler needs it
+        body: JSON.stringify({}),
+      });
+    } catch (err) {
+      // silently ignore or log if needed
+      console.error("Failed to trigger Telegram handler:", err);
+    }
+  };
+
   return (
     <motion.div
       layout
@@ -98,6 +116,14 @@ export default function UserAccordion({
           </motion.div>
         </div>
       </button>
+
+      {/* Button to preview Telegram message */}
+      {/* <button
+        onClick={triggerTelegram}
+        className="ml-2 px-2 py-1 text-xs font-semibold bg-yellow-400 hover:bg-yellow-500 rounded text-white"
+      >
+        Preview Message
+      </button> */}
 
       {/* Accordion Content */}
       <AnimatePresence initial={false}>
