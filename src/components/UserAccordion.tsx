@@ -31,6 +31,25 @@ export default function UserAccordion({
   onSelectSheet,
 }: UserAccordionProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [sortOrder, setSortOrder] = useState<"updated" | "not_updated">(
+    "updated"
+  );
+  // Compute sorted sheets based on current sort order
+  const sortedSheets = [...sheets].sort((a, b) => {
+    const userLower = user.toLowerCase();
+
+    const aUpdated =
+      a.history?.some((h: any) => h.user?.toLowerCase() === userLower) &&
+      new Date(a.lastModifiedTime).toDateString() === new Date().toDateString();
+
+    const bUpdated =
+      b.history?.some((h: any) => h.user?.toLowerCase() === userLower) &&
+      new Date(b.lastModifiedTime).toDateString() === new Date().toDateString();
+
+    if (sortOrder === "updated")
+      return aUpdated === bUpdated ? 0 : aUpdated ? -1 : 1;
+    else return aUpdated === bUpdated ? 0 : aUpdated ? 1 : -1;
+  });
 
   return (
     <motion.div
@@ -91,91 +110,114 @@ export default function UserAccordion({
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="border-t border-gray-100 bg-gray-50 overflow-hidden"
           >
-            <div className="px-2 py-1">
-              {sheets.length > 0 ? (
-                sheets.map((sheet, index) => {
-                  const userLower = user.toLowerCase();
-                  const hasUpdated = sheet.history?.some(
-                    (h: any) => h.user?.toLowerCase() === userLower
-                  );
-                  const lastModified = new Date(sheet.lastModifiedTime);
-                  const now = new Date();
-                  const isSameDay =
-                    lastModified.getFullYear() === now.getFullYear() &&
-                    lastModified.getMonth() === now.getMonth() &&
-                    lastModified.getDate() === now.getDate();
-                  const isUpdated = hasUpdated && isSameDay;
+            <div className="px-4 py-3 space-y-3">
+              {/* Sorting Control - styled like a card inside accordion */}
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-center justify-between bg-white border border-gray-200 rounded-md p-2 shadow-sm"
+              >
+                <span className="text-xs font-medium text-gray-600">
+                  Sort Sheets:
+                </span>
+                <select
+                  className="text-xs border border-gray-300 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-green-500"
+                  value={sortOrder}
+                  onChange={(e) =>
+                    setSortOrder(e.target.value as "updated" | "not_updated")
+                  }
+                >
+                  <option value="updated">Completed</option>
+                  <option value="not_updated">Not Completed</option>
+                </select>
+              </motion.div>
 
-                  return (
-                    <motion.div
-                      key={sheet.spreadsheetId}
-                      layout
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    //   onClick={() => onSelectSheet(sheet)}
-                      className={`group flex flex-col md:flex-row items-start md:items-center justify-between 
-                        px-5 py-3 border border-gray-100 rounded-md mb-1 cursor-pointer transition-all duration-200 
-                        hover:shadow-sm hover:bg-gray-50
+              {/* Sheets List */}
+              <div className="space-y-2">
+                {sortedSheets.length > 0 ? (
+                  sortedSheets.map((sheet, index) => {
+                    const userLower = user.toLowerCase();
+                    const hasUpdated = sheet.history?.some(
+                      (h: any) => h.user?.toLowerCase() === userLower
+                    );
+                    const lastModified = new Date(sheet.lastModifiedTime);
+                    const now = new Date();
+                    const isSameDay =
+                      lastModified.getFullYear() === now.getFullYear() &&
+                      lastModified.getMonth() === now.getMonth() &&
+                      lastModified.getDate() === now.getDate();
+                    const isUpdated = hasUpdated && isSameDay;
+
+                    return (
+                      <motion.div
+                        key={sheet.spreadsheetId}
+                        layout
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className={`group bg-white flex flex-col md:flex-row items-start md:items-center justify-between 
+                    px-5 py-3 border border-gray-100 rounded-md cursor-pointer transition-all duration-200 
+                    hover:shadow-sm hover:bg-gray-50
+                    ${
+                      isUpdated
+                        ? "border-l-4 border-green-500"
+                        : "border-l-4 border-red-500"
+                    }`}
+                      >
+                        {/* Left Section */}
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-8 h-8 flex items-center justify-center rounded-md 
                         ${
                           isUpdated
-                            ? "border-l-4 border-green-500"
-                            : "border-l-4 border-red-500"
-                        }
-                      `}
-                    >
-                      {/* Left Section */}
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-8 h-8 flex items-center justify-center rounded-md 
-                            ${
-                              isUpdated
-                                ? "bg-green-100 text-green-600"
-                                : "bg-red-100 text-red-600"
-                            }`}
-                        >
-                          <FileSpreadsheet size={16} />
+                            ? "bg-green-100 text-green-600"
+                            : "bg-red-100 text-red-600"
+                        }`}
+                          >
+                            <FileSpreadsheet size={16} />
+                          </div>
+
+                          <div className="flex flex-col">
+                            <span className="text-sm font-semibold text-gray-800 truncate max-w-[220px]">
+                              {sheet.title}
+                            </span>
+                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                              <Clock size={12} />
+                              {new Date(
+                                sheet.lastModifiedTime
+                              ).toLocaleString() || "N/A"}
+                            </div>
+                          </div>
                         </div>
 
-                        <div className="flex flex-col">
-                          <span className="text-sm font-semibold text-gray-800 truncate max-w-[220px]">
-                            {sheet.title}
-                          </span>
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <Clock size={12} />
-                            {new Date(
-                              sheet.lastModifiedTime
-                            ).toLocaleString() || "N/A"}
-                          </div>
+                        {/* Right Section */}
+                        <div className="flex justify-end items-end w-full mt-2 md:mt-0">
+                          {isUpdated ? (
+                            <div className="flex items-center border p-1 bg-green-700 rounded-md">
+                              <Check size={16} className="text-white" />
+                              <span className="text-xs text-white font-medium ml-1">
+                                Completed
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center border p-1 bg-red-700 rounded-md">
+                              <X size={16} className="text-white" />
+                              <span className="text-xs text-white font-medium ml-1">
+                                Not Completed
+                              </span>
+                            </div>
+                          )}
                         </div>
-                      </div>
-
-                      {/* Right Section */}
-                      <div className="flex justify-end items-end w-full mt-2 md:mt-0">
-                        {isUpdated ? (
-                          <div className="flex items-center border p-1 bg-green-700 rounded-md">
-                            <Check size={16} className="text-white" />
-                            <span className="text-xs text-white font-medium ml-1">
-                              Completed
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center border p-1 bg-red-700 rounded-md">
-                            <X size={16} className="text-white" />
-                            <span className="text-xs text-white font-medium ml-1">
-                              Not Completed
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  );
-                })
-              ) : (
-                <div className="text-center py-2 text-gray-400 text-sm">
-                  No sheets found
-                </div>
-              )}
+                      </motion.div>
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-2 text-gray-400 text-sm">
+                    No sheets found
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
         )}
