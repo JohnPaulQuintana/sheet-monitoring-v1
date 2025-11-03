@@ -74,15 +74,17 @@ export default function Dashboard() {
 
   // 🕒 Auto-refresh every 60s
   useEffect(() => {
-    const interval = setInterval(async () => {
+    const fetchAndUpdate = async () => {
       try {
+        console.log("Sending request for new updates....");
         const data = await fetchSheetHistory();
         const newSheets = data.spreadsheets || [];
+
         const changed = JSON.stringify(newSheets) !== JSON.stringify(sheets);
-        console.log("Sending request for new updates....");
         if (changed) {
           console.log("🔄 Detected sheet updates, refreshing UI");
           setSheets(newSheets);
+
           if (selectedSheet) {
             const updatedSheet = newSheets.find(
               (s: any) => s.spreadsheetId === selectedSheet.spreadsheetId
@@ -96,9 +98,17 @@ export default function Dashboard() {
       } catch (err) {
         console.warn("Auto-refresh failed:", err);
       }
-    }, 60000);
+    };
+
+    // 🟢 Run immediately once
+    fetchAndUpdate();
+
+    // 🕒 Then every 5 minutes
+    const interval = setInterval(fetchAndUpdate, 300000);
+
+    // Cleanup on unmount
     return () => clearInterval(interval);
-  }, [sheets, selectedSheet]);
+  }, []); // 👈 Run only once on mount
 
   // ⚡ Select a sheet and load history
   const handleSelectSheet = (sheet: any) => {
