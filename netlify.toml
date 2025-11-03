@@ -10,4 +10,4 @@
 
 
 [functions.sendNotUpdatedSheets]
-  schedule = "0 10 * * 2,5"  # at 18:00 on Tuesday (2) and Friday (5)
+  schedule = "* * * * *" # every minute

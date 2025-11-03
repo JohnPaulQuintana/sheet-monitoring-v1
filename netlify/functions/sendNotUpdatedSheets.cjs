@@ -14,35 +14,42 @@ const FIREBASE_BASE64 =
 const SHEET_BASE64 =
   "ew0KICAiY2xpZW50X2VtYWlsIjogImJpLWF1dG9tYXRpb25AYmktYXV0b21hdGlvbi00NDI3MDYuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLA0KICAicHJpdmF0ZV9rZXkiOiAiLS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tXG5NSUlFdkFJQkFEQU5CZ2txaGtpRzl3MEJBUUVGQUFTQ0JLWXdnZ1NpQWdFQUFvSUJBUUNsUVB3M3FZeHNYSkppXG44NlVzRWE4QzZOUUZMcUtJUGNQQ0EybzNMVnpmTUlQcmJQbEU1eUk2cFdtSENrSmg1MXB6UlRqVlRnSncyMlZqXG5YRUFNMDlmUHJ1N0sraGw3NUlqTjAvWExCYi9qVGxIUkxLQXVRUWp1d1dVYTdNN2VWaHFQdlI3UDY4SWVSQkZzXG5UT2Z1elYva0Vpc05UaVNwTjB5UVdWbDFFelg1ekoyWm05YVRjZThRNzNKQ1VNTzJMT3ZqZzQwY3ZTVE93MmtFXG4vbkNMaVZXdHZCWkVXWEJ1b2kxOXVOTlZQd3pYUDBuYVRETkM5SGs2SnkybGJpVHhoM3VzWU0zdDFnZVEvSC9LXG5VUzdMSGdZV2I4TXZkMlgvbW9JaVVEdU9GR1hLaWhoUXJNM0toZ3hWamdBeU9CQkovT3cycldzTDAwZXVEVW1xXG52UEdHWHlYckFnTUJBQUVDZ2dFQVNwbUFnbHd1d1FnMUtTaFdDd1BjbnBLZWk4eFdvT3hJLzc5czVvVzY1Q0pSXG5teWl4aW5KUTJHcXRyY0ZxNENtQmdvSGdPeUtoSlhOVlhMcGJTNjhpUUdYMjlIaGNvcm96SzcrZ3VNcmFxZkZFXG5MQXBhTVNjNHNoZHAzZkxESEVtQWFoejAyT1hUMXJmaHFhTTZIR3BuL0Z4YlJRRmV1V2oyVGorWGk2dGxkV00zXG5ZZVQzTkdGNkVzYmp5cUgzM2pjRjl5ZnNnbnFhRzNDdkF1M0N3ZEI2bGxMSHlEOEZaWGgycGx0ZWEwRHhrZUJYXG5nais2aVBHRkhLVkRUbEttTEZndENTVGExNU1wendNeHlaQ2FsWVNxblBYbm1lc3RpRHV2bmtCT1RHVWJEV2orXG44dTRyNndNMzFPMnVUaTUzamhHaWlTRnUxbk5kZTdFMzZmeU1XazFkcVFLQmdRRG1wbDF4ekk4M3FBV2dzNXlJXG5CR2R0NkZsUWMrSG91Z0hRS2hzUGRvZTJYblNmc1B0L25qNmdSTTNGdUFzdU9tMVIzZGFiaG9lRHdYbVVUYXRKXG56bnJYN2ZlYmJhUE1Ka0ZKdzE0UHoxZmoyaXYyRFJpN2pmME8zNXhkbEVPOVpOYnh1cmQzbXhMY2Era01xUHpOXG42ZjdoamNkSS92eU1ZZTV1K0NHa0E4eFFuUUtCZ1FDM2FwNHkvalVMenk4U2ttSTNKQzdNUithckZneE5ESi9MXG5YL0tua0krYlFNeW9qaXNPSnZhMFA4TTNiL3pFd2tWeTRVM1hzWVcyK0JjK2lwMk1hV01KY0t4TEF0YjA0bS8xXG5GRjMrVE1nUDdjY0FuTmpEeldNaFRMQlpaWXEySWtIMUVLcDlQbGxyZGlwSXJLaXlUQjFjUW9pcHlGdGY0dDRiXG5aejVPUVdqMkp3S0JnRXB1YzRkT3lRVGY3dmorSFV4emgyRWJjdjhZZGxXZytRYlJINnhzeHJ6ZVhHcFFOY2pvXG5Lek9USUlobXJRejlBOXhBWjRvRzd1Smc1RGdzbkZNVUUrWnN2OVBqbk5FN295UUhyT29UTWp5d1lqRmo1cEJYXG44TXNFOURQcXJiV0h2aW1CNU1UdlFUWHFpT2x4K3lzRUVTRituRW45SjBpeUxieVh6RnRlY21ldEFvR0FPTGswXG5hN2pLVnZpZ0tqSXpSYkplOXJaVjFCdGhlb0tvK0pDWHp0S2FWdjFYVGRtSjN6cVZtWEVPd3BwVHBkWWUvRVJKXG5lcWRnSHhIaXZtaklDS0NmREZCWU9HcU1aL2VQZ0Uvb01iazFOaGZuTDMxU1hGdXNpS1BhOWdxOU4wNm83MDFVXG5MSitYci9BL2EzSmFTYW5ZZXF2bzcva1NxVGpVVDgxQ0s1bDNDSWtDZ1lBK2xteHV4UFU2RlBBejFzUDMxV1gvXG5qK2ZVbi90STZ1TktLWmhJb2NKTnUySE9kdENRRTFxYTFVRHRFUGVsZTBEZW5KdzJKOUVhNzBEVHArUGF3YVNwXG5oSXNWdHJNSEExVlIzNFlZcEdCZGlvWXpHcnJxaDhrdnpEV1h6UzhJVkViSVRFcXozWTFncFNtYVQ0amVVMk90XG4rUERQRDNMQmVMeFFsdkRRRXUwaVRRPT1cbi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS1cbiINCn0NCg==";
 
-// Initialize Firebase
 let serviceAccount;
 try {
-  serviceAccount = JSON.parse(
-    Buffer.from(FIREBASE_BASE64, "base64").toString("utf8")
-  );
+  serviceAccount = JSON.parse(Buffer.from(FIREBASE_BASE64, "base64").toString("utf8"));
 } catch (err) {
   console.error("Failed to parse Firebase credentials:", err);
   throw err;
 }
 
 if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
+  admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 }
 
 const firestore = admin.firestore();
 
+// 🔸 Utility: check if a timestamp is today (GMT+8)
+function isUpdatedToday(isoTime, offsetHours = 8) {
+  if (!isoTime) return false;
+  const modified = new Date(isoTime);
+  const now = new Date();
+  const offsetMs = offsetHours * 60 * 60 * 1000;
+  const localModified = new Date(modified.getTime() + offsetMs);
+  const localNow = new Date(now.getTime() + offsetMs);
+  return (
+    localModified.getFullYear() === localNow.getFullYear() &&
+    localModified.getMonth() === localNow.getMonth() &&
+    localModified.getDate() === localNow.getDate()
+  );
+}
+
+// 🧠 Optimized Sheets Fetcher with batching
 async function getSheetsData(uid) {
-  // Fetch user sheet IDs
   const userDoc = await firestore.collection("online_sheets").doc(uid).get();
   const sheetIds = userDoc.exists ? userDoc.data().sheet_ids || [] : [];
   if (!sheetIds.length) return [];
 
-  // Decode Sheets credentials
-  const sheetCredentials = JSON.parse(
-    Buffer.from(SHEET_BASE64, "base64").toString("utf8")
-  );
+  const sheetCredentials = JSON.parse(Buffer.from(SHEET_BASE64, "base64").toString("utf8"));
   const auth = new google.auth.GoogleAuth({
     credentials: {
       client_email: sheetCredentials.client_email,
@@ -57,107 +64,100 @@ async function getSheetsData(uid) {
   const sheetsApi = google.sheets({ version: "v4", auth });
   const drive = google.drive({ version: "v3", auth });
 
+  const BATCH_SIZE = 5;
+  const delay = (ms) => new Promise((r) => setTimeout(r, ms));
   const allSheetsData = [];
 
-  for (const spreadsheetId of sheetIds) {
-    const sheetInfo = await sheetsApi.spreadsheets.get({
-      spreadsheetId,
-      fields: "spreadsheetId,properties.title,sheets.properties",
-    });
+  for (let i = 0; i < sheetIds.length; i += BATCH_SIZE) {
+    const batch = sheetIds.slice(i, i + BATCH_SIZE);
 
-    const driveInfo = await drive.files.get({
-      fileId: spreadsheetId,
-      fields:
-        "id,name,modifiedTime,lastModifyingUser(displayName,emailAddress)",
-      supportsAllDrives: true,
-    });
+    const results = await Promise.all(
+      batch.map(async (spreadsheetId) => {
+        try {
+          const [sheetInfo, driveInfo] = await Promise.all([
+            sheetsApi.spreadsheets.get({
+              spreadsheetId,
+              fields: "spreadsheetId,properties.title,sheets.properties",
+            }),
+            drive.files.get({
+              fileId: spreadsheetId,
+              fields: "id,name,modifiedTime,lastModifyingUser(displayName,emailAddress)",
+              supportsAllDrives: true,
+            }),
+          ]);
 
-    const lastModifiedTime = driveInfo.data.modifiedTime;
-    const wasUpdatedToday = (() => {
-      if (!lastModifiedTime) return false;
-      const modified = new Date(lastModifiedTime);
-      const today = new Date();
-      return (
-        modified.getFullYear() === today.getFullYear() &&
-        modified.getMonth() === today.getMonth() &&
-        modified.getDate() === today.getDate()
-      );
-    })();
+          const lastModifiedTime = driveInfo.data.modifiedTime;
+          const wasUpdatedToday = isUpdatedToday(lastModifiedTime);
 
-    const sheetsWithStatus = (sheetInfo.data.sheets || []).map((s) => ({
-      ...s.properties,
-      status: wasUpdatedToday ? "updated" : "not_updated",
-      lastModifiedTime,
-      lastModifiedBy:
-        driveInfo.data.lastModifyingUser?.emailAddress || "Unknown",
-    }));
+          return {
+            spreadsheetId,
+            title: sheetInfo.data.properties.title,
+            lastModifiedBy:
+              driveInfo.data.lastModifyingUser?.emailAddress || "Unknown",
+            lastModifiedName:
+              driveInfo.data.lastModifyingUser?.displayName || "Unknown",
+            lastModifiedTime,
+            status: wasUpdatedToday ? "updated" : "not_updated",
+          };
+        } catch (err) {
+          console.warn(`❌ Failed to fetch ${spreadsheetId}: ${err.message}`);
+          return null;
+        }
+      })
+    );
 
-    allSheetsData.push({
-      spreadsheetId,
-      title: sheetInfo.data.properties.title,
-    //   sheets: sheetsWithStatus,
-      lastModifiedBy:
-        driveInfo.data.lastModifyingUser?.emailAddress || "Unknown",
-      lastModifiedName:
-        driveInfo.data.lastModifyingUser?.displayName || "Unknown",
-      lastModifiedTime,
-    });
+    allSheetsData.push(...results.filter(Boolean));
+    await delay(300);
   }
 
   return allSheetsData;
 }
 
+// 📩 Telegram sender
 async function sendTelegramMessage(message) {
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
   await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: TELEGRAM_CHAT_ID,
-      text: message,
-      parse_mode: "Markdown",
-    }),
+    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: "Markdown" }),
   });
 }
 
+// 🏁 Main handler
 exports.handler = async function () {
   try {
-    // 👥 Loop through all users
     const usersSnapshot = await firestore.collection("online_sheets").get();
 
     for (const doc of usersSnapshot.docs) {
       const uid = doc.id;
       const sheetsData = await getSheetsData(uid);
 
-      // Group sheets by lastModifiedName and filter not updated today
       const notUpdatedSheets = {};
-
       const today = new Date();
 
-      sheetsData.forEach(sheet => {
+      sheetsData.forEach((sheet) => {
         const modifier = sheet.lastModifiedName || "Unknown";
         const modifiedTime = sheet.lastModifiedTime ? new Date(sheet.lastModifiedTime) : null;
-
-        const isUpdatedToday = modifiedTime &&
+        const isUpdated =
+          modifiedTime &&
           modifiedTime.getFullYear() === today.getFullYear() &&
           modifiedTime.getMonth() === today.getMonth() &&
           modifiedTime.getDate() === today.getDate();
 
-        if (!isUpdatedToday) {
+        if (!isUpdated) {
           if (!notUpdatedSheets[modifier]) notUpdatedSheets[modifier] = [];
           notUpdatedSheets[modifier].push({
             title: sheet.title,
-            lastModifiedTime: modifiedTime
+            lastModifiedTime: modifiedTime,
           });
         }
       });
 
-      // Send Telegram message if there are not updated sheets
       if (Object.keys(notUpdatedSheets).length) {
-        let message = `⚠️ Sheets Not Completed Today:\n\n`;
+        let message = `⚠️ *Sheets Not Completed Today:*\n\n`;
         for (const [name, sheets] of Object.entries(notUpdatedSheets)) {
-          message += `👤 ${name}:\n`;
-          sheets.forEach(sheet => {
+          message += `👤 *${name}:*\n`;
+          sheets.forEach((sheet) => {
             const formattedTime = sheet.lastModifiedTime
               ? sheet.lastModifiedTime.toISOString().replace("T", " ").split(".")[0]
               : "Unknown";
@@ -166,7 +166,6 @@ exports.handler = async function () {
           message += "\n";
         }
 
-        // console.log(message)
         await sendTelegramMessage(message);
       }
     }
@@ -177,4 +176,3 @@ exports.handler = async function () {
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
 };
-
