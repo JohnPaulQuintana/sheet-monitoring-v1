@@ -7,7 +7,7 @@ export default function SheetItem({ sheet, active, onClick }: any) {
   // A sheet is considered "updated" if itself or any of its tabs are updated
   const isUpdated = hasTabs
     ? sheet.sheets.some((tab: any) => tab.status === "updated")
-    : false;
+    : sheet.status === "updated";
 
   const visibleTabs = hasTabs ? sheet.sheets.slice(0, 3) : []; // show first 3
   const hiddenCount = hasTabs ? sheet.sheets.length - visibleTabs.length : 0;

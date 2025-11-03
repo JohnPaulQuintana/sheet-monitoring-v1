@@ -44,6 +44,21 @@ function initGoogleClients() {
 }
 
 /* -------------------- HELPERS -------------------- */
+
+function isUpdatedToday(isoTime) {
+  if (!isoTime) return false;
+
+  const lastModified = new Date(isoTime);
+  const now = new Date();
+
+  // Adjust both to the same timezone (e.g. +8)
+  const offset = 8 * 60; // minutes for GMT+8
+  const localLastModified = new Date(lastModified.getTime() + offset * 60000);
+  const localNow = new Date(now.getTime() + offset * 60000);
+
+  return localLastModified.toDateString() === localNow.toDateString();
+}
+
 async function processSheet(spreadsheetId) {
   const [sheetInfo, driveInfo, revisionsInfo] = await Promise.all([
     sheetsApi.spreadsheets.get({
@@ -73,9 +88,10 @@ async function processSheet(spreadsheetId) {
 
   const lastModifiedTime = driveInfo.data.modifiedTime;
   const today = new Date();
-  const wasUpdatedToday =
-    lastModifiedTime &&
-    new Date(lastModifiedTime).toDateString() === today.toDateString();
+  // const wasUpdatedToday =
+  //   lastModifiedTime &&
+  //   new Date(lastModifiedTime).toDateString() === today.toDateString();
+  const wasUpdatedToday = isUpdatedToday(lastModifiedTime);
 
   const sheetsWithStatus = (sheetInfo.data.sheets || []).map((s) => ({
     ...s.properties,
