@@ -3,11 +3,11 @@ import { FileSpreadsheet, CircleCheck } from "lucide-react";
 export default function SheetItem({ sheet, active, onClick }: any) {
   // console.log(active)
   const hasTabs = Array.isArray(sheet.sheets);
-
+  console.log(sheet)
   // A sheet is considered "updated" if itself or any of its tabs are updated
   const isUpdated = hasTabs
     ? sheet.sheets.some((tab: any) => tab.status === "updated")
-    : sheet.status === "updated";
+    : false;
 
   const visibleTabs = hasTabs ? sheet.sheets.slice(0, 3) : []; // show first 3
   const hiddenCount = hasTabs ? sheet.sheets.length - visibleTabs.length : 0;
