@@ -2,6 +2,9 @@ import { FileSpreadsheet, CircleCheck } from "lucide-react";
 
 export default function SheetItem({ sheet, active, onClick }: any) {
   // console.log(active)
+  // Skip rendering if the sheet has no title
+  if (!sheet.title || sheet.title.trim() === "") return null;
+  
   const hasTabs = Array.isArray(sheet.sheets);
   console.log(sheet)
   // A sheet is considered "updated" if itself or any of its tabs are updated

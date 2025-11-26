@@ -37,6 +37,12 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<any | null>(null);
 
+  const [progress, setProgress] = useState({
+    total: 0,
+    current: 0,
+    activeSheetTitle: "",
+  });
+
   // Fetch User
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -54,61 +60,135 @@ export default function Dashboard() {
     fetchUserProfile();
   }, [user]);
 
-  // 🧭 Load sheets for authenticated user
+  // 🧭 Load sheets and their histories for authenticated user
   useEffect(() => {
-    const loadSheets = async () => {
+    const loadSheetsAndHistories = async () => {
       if (!user) return;
 
       try {
-        const data = await fetchSheetHistory();
-        setSheets(data.spreadsheets || []);
+        setLoading(true);
+        setError(null);
+
+        // 1️⃣ Fetch all sheets metadata
+        const sheetsRes = await axios.get(
+          `/.netlify/functions/getSheets?uid=${user.uid}`
+        );
+        const allSheets = sheetsRes.data.sheets || [];
+
+        const sheetsWithHistory: any[] = [];
+
+        setProgress({
+          total: allSheets.length,
+          current: 0,
+          activeSheetTitle: "Starting...",
+        });
+
+        // 2️⃣ Fetch each sheet's history sequentially
+        for (const sheet of allSheets) {
+          try {
+            console.log("Fetching history for sheet:", sheet);
+            
+
+            const historyRes = await fetchSheetHistory(sheet);
+            console.log(historyRes);
+            setProgress((prev) => ({
+              ...prev,
+              activeSheetTitle: historyRes?.title || "Untitled Sheet",
+            }));
+            sheetsWithHistory.push({
+              ...historyRes?.sheets,
+              title: historyRes?.title,
+              sheets: historyRes?.sheets,
+              history: historyRes?.history || [],
+              lastModifiedTime: historyRes?.lastModifiedTime || null,
+              lastModifiedBy: historyRes?.lastModifiedBy || null,
+            });
+          } catch (err) {
+            console.warn(
+              `Failed to fetch history for sheet ${sheet.spreadsheetId}:`,
+              err
+            );
+            sheetsWithHistory.push({ ...sheet, history: [] });
+          }
+
+          // Update progress counter
+          setProgress((prev) => ({
+            ...prev,
+            current: prev.current + 1,
+          }));
+        }
+        console.log(sheetsWithHistory);
+        setSheets(sheetsWithHistory);
       } catch (err: any) {
-        console.error("Error fetching sheets:", err);
+        console.error("Error loading sheets with history:", err);
         setError(err.message || "Failed to fetch sheets");
       } finally {
         setLoading(false);
       }
     };
-    loadSheets();
+
+    loadSheetsAndHistories();
   }, [user]);
 
-  // 🕒 Auto-refresh every 60s
-  useEffect(() => {
-    const fetchAndUpdate = async () => {
-      try {
-        console.log("Sending request for new updates....");
-        const data = await fetchSheetHistory();
-        const newSheets = data.spreadsheets || [];
+  // // 🕒 Auto-refresh every 5 minutes
+  // useEffect(() => {
+  //   const fetchAndUpdate = async () => {
+  //     if (!user) return;
 
-        const changed = JSON.stringify(newSheets) !== JSON.stringify(sheets);
-        if (changed) {
-          console.log("🔄 Detected sheet updates, refreshing UI");
-          setSheets(newSheets);
+  //     try {
+  //       console.log("Sending request for new updates...");
 
-          if (selectedSheet) {
-            const updatedSheet = newSheets.find(
-              (s: any) => s.spreadsheetId === selectedSheet.spreadsheetId
-            );
-            if (updatedSheet) {
-              setSelectedSheet(updatedSheet);
-              setHistory(updatedSheet.history || []);
-            }
-          }
-        }
-      } catch (err) {
-        console.warn("Auto-refresh failed:", err);
-      }
-    };
+  //       // 1️⃣ Fetch all sheets metadata
+  //       const sheetsRes = await axios.get(`/.netlify/functions/getSheets?uid=${user.uid}`);
+  //       const allSheets = sheetsRes.data.sheets || [];
 
-    // 🟢 Run immediately once
-    fetchAndUpdate();
+  //       // 2️⃣ Fetch histories in parallel
+  //       const updatedSheets = await Promise.all(
+  //         allSheets.map(async (sheet: any) => {
+  //           try {
+  //             const historyRes = await fetchSheetHistory(sheet.spreadsheetId);
+  //             return {
+  //               ...sheet,
+  //               history: historyRes.spreadsheet?.history || [],
+  //               lastModifiedTime: historyRes.spreadsheet?.lastModifiedTime || null,
+  //               lastModifiedBy: historyRes.spreadsheet?.lastModifiedBy || null,
+  //             };
+  //           } catch (err) {
+  //             console.warn(`Failed to fetch history for sheet ${sheet.spreadsheetId}:`, err);
+  //             return { ...sheet, history: [] };
+  //           }
+  //         })
+  //       );
 
-    // 🕒 Then every 5 minutes
-    const interval = setInterval(fetchAndUpdate, 300000);
+  //       // 3️⃣ Check for changes before updating state
+  //       const changed = JSON.stringify(updatedSheets) !== JSON.stringify(sheets);
+  //       if (changed) {
+  //         console.log("🔄 Detected sheet updates, refreshing UI");
+  //         setSheets(updatedSheets);
 
-    // Cleanup on unmount
-    return () => clearInterval(interval);
-  }, []); // 👈 Run only once on mount
+  //         if (selectedSheet) {
+  //           const updatedSelected = updatedSheets.find(
+  //             (s: any) => s.spreadsheetId === selectedSheet.spreadsheetId
+  //           );
+  //           if (updatedSelected) {
+  //             setSelectedSheet(updatedSelected);
+  //             setHistory(updatedSelected.history || []);
+  //           }
+  //         }
+  //       }
+  //     } catch (err) {
+  //       console.warn("Auto-refresh failed:", err);
+  //     }
+  //   };
+
+  //   // 🟢 Run immediately once
+  //   fetchAndUpdate();
+
+  //   // 🕒 Then every 5 minutes
+  //   const interval = setInterval(fetchAndUpdate, 300000);
+
+  //   return () => clearInterval(interval);
+  // }, [user, sheets, selectedSheet]);
 
   // ⚡ Select a sheet and load history
   const handleSelectSheet = (sheet: any) => {
@@ -124,7 +204,7 @@ export default function Dashboard() {
     // 1️⃣ Aggregate user edit counts and latest edit date
     sheets.forEach((sheet) => {
       sheet.history?.forEach((h: any) => {
-        console.log(h);
+        // console.log(h);
         if (!h.user || !h.modifiedTime) return;
 
         const user = h.user.trim();
@@ -162,6 +242,7 @@ export default function Dashboard() {
 
   // 🎯 Filter sheets by selected user
   const filteredSheets = useMemo(() => {
+    console.log(sheets);
     if (!activeUser) return sheets;
     return sheets.filter((sheet) =>
       sheet.history?.some((h: any) => h.user === activeUser)
@@ -180,17 +261,41 @@ export default function Dashboard() {
   // ✅ Loading State
   if (loading)
     return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm z-50">
+        {/* Spinner */}
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="mb-6"
+          className="mb-4"
         >
-          <Loader2 size={64} className="text-green-600" />
+          <Loader2 size={52} className="text-green-600" />
         </motion.div>
-        <p className="text-lg font-semibold text-gray-700 animate-pulse">
-          Loading sheets...
+
+        {/* Loading text */}
+        <p className="text-lg font-semibold text-gray-700">Loading sheets...</p>
+
+        {/* Currently loading sheet */}
+        <p className="text-sm text-gray-500 mt-1">
+          {progress.activeSheetTitle}
         </p>
+
+        {/* Progress count */}
+        <p className="text-sm text-gray-500 mt-1">
+          {progress.current} / {progress.total}
+        </p>
+
+        {/* Progress bar */}
+        <div className="mt-5 w-64 h-2 rounded-full bg-gray-200 overflow-hidden">
+          <div
+            className="h-full bg-green-600 transition-all"
+            style={{
+              width:
+                progress.total === 0
+                  ? "0%"
+                  : `${(progress.current / progress.total) * 100}%`,
+            }}
+          ></div>
+        </div>
       </div>
     );
 

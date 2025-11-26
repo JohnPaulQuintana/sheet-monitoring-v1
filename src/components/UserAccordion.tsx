@@ -83,7 +83,16 @@ export default function UserAccordion({
         <div className="flex flex-col text-left">
           <div className="flex items-center gap-1 mb-2">
             <CircleUser className="shrink-0 text-green-800 w-5" />
-            <span className="text-sm font-semibold text-green-800">{user}</span>
+
+            <span
+              className="
+                text-sm font-semibold text-green-800
+                truncate max-w-[120px]        /* mobile */
+                md:max-w-none md:truncate-none /* desktop → no ellipsis */
+              "
+            >
+              {user}
+            </span>
           </div>
 
           <div className="flex items-center text-xs text-gray-500 gap-3">

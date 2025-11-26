@@ -11,7 +11,7 @@ export default function Sidebar({
   onClose,
 }: any) {
   const [sortFilter, setSortFilter] = useState("all");
-
+  console.log(sheets)
   const filteredSheets = useMemo(() => {
     if (sortFilter === "updated") {
       return sheets.filter((sheet: any) => {
