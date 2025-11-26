@@ -87,7 +87,6 @@ export default function Dashboard() {
         for (const sheet of allSheets) {
           try {
             console.log("Fetching history for sheet:", sheet);
-            
 
             const historyRes = await fetchSheetHistory(sheet);
             console.log(historyRes);
@@ -261,41 +260,50 @@ export default function Dashboard() {
   // ✅ Loading State
   if (loading)
     return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm z-50">
-        {/* Spinner */}
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-xl z-50 px-6">
+        {/* Animated Spinner */}
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="mb-4"
+          className="mb-6"
         >
-          <Loader2 size={52} className="text-green-600" />
+          <Loader2 className="w-14 h-14 text-green-600 opacity-80" />
         </motion.div>
 
-        {/* Loading text */}
-        <p className="text-lg font-semibold text-gray-700">Loading sheets...</p>
+        {/* Title */}
+        <p className="text-xl font-semibold text-gray-800 tracking-wide">
+          Loading your sheets
+        </p>
 
-        {/* Currently loading sheet */}
-        <p className="text-sm text-gray-500 mt-1">
+        {/* Active Sheet Name */}
+        <p className="text-sm text-gray-500 mt-1 max-w-[250px] truncate text-center">
           {progress.activeSheetTitle}
         </p>
 
-        {/* Progress count */}
-        <p className="text-sm text-gray-500 mt-1">
+        {/* Progress Counter */}
+        <p className="text-xs text-gray-500 mt-1">
           {progress.current} / {progress.total}
         </p>
 
-        {/* Progress bar */}
-        <div className="mt-5 w-64 h-2 rounded-full bg-gray-200 overflow-hidden">
-          <div
-            className="h-full bg-green-600 transition-all"
-            style={{
+        {/* Smooth Progress Bar */}
+        <div className="mt-6 w-64 h-2 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{
               width:
                 progress.total === 0
                   ? "0%"
                   : `${(progress.current / progress.total) * 100}%`,
             }}
-          ></div>
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full"
+          />
         </div>
+
+        {/* Subtle Hint */}
+        <p className="text-[11px] text-gray-400 mt-3">
+          This may take a moment…
+        </p>
       </div>
     );
 
